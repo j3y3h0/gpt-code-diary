@@ -1,26 +1,28 @@
-### title: AI 비서를 활용한 간단한 챗봇 구현
+### title: AI 비서가 기본 장착된 기기를 위한 간단한 음성 명령 인식 기능 구현
 
-**content:**
-
+### content:
 ```python
-# Python을 사용하여 간단한 AI 비서를 활용한 챗봇 구현 예제입니다. 
-# 이 코드는 사용자의 입력에 따라 기본적인 인사 응답을 제공합니다.
+import speech_recognition as sr
 
-def ai_assistant(input_text):
-    # 간단한 인사말에 대한 응답을 정의
-    responses = {
-        "안녕하세요": "안녕하세요! 무엇을 도와드릴까요?",
-        "안녕": "안녕하세요! 좋은 하루 보내세요.",
-        "잘 지냈어요?": "네, 감사합니다. 당신은 어땠나요?",
-        "고마워": "천만에요! 언제든지 도와드릴게요."
-    }
+def recognize_speech_from_mic():
+    recognizer = sr.Recognizer()
+    microphone = sr.Microphone()
     
-    # 입력된 텍스트가 사전의 키에 있으면 해당 응답을 반환
-    return responses.get(input_text, "죄송합니다, 이해하지 못했어요.")
+    with microphone as source:
+        print("Listening for a command...")
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
+    
+    try:
+        command = recognizer.recognize_google(audio)
+        print(f"You said: {command}")
+    except sr.UnknownValueError:
+        print("Sorry, I could not understand the audio.")
+    except sr.RequestError:
+        print("Could not request results from Google Speech Recognition service.")
 
-# 사용 예제
-print(ai_assistant("안녕하세요"))  # "안녕하세요! 무엇을 도와드릴까요?" 출력
-print(ai_assistant("잘 지냈어요?"))  # "네, 감사합니다. 당신은 어땠나요?" 출력
+if __name__ == "__main__":
+    recognize_speech_from_mic()
 ```
 
-이 코드는 AI 비서가 기본적인 인사말에 반응하도록 설계되었다. LG유플러스 판매 갤럭시폰에 AI 비서 익시오가 기본 장착된다는 뉴스에서 영감을 받아 간단한 챗봇을 구현하였다. 사용자의 입력에 따라 미리 정의된 응답을 제공한다.
+이 코드는 Python을 사용하여 마이크로부터 음성을 입력받아 Google Speech Recognition API를 통해 음성을 텍스트로 변환한다. 이는 AI 비서 기능을 지원하는 기기에서 음성 명령을 인식하는데 유용하다.
