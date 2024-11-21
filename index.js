@@ -4,6 +4,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import winston, { createLogger, transports } from "winston";
 import OpenAIApi from "openai";
+import { exec } from "child_process";
 
 dotenv.config();
 
@@ -120,6 +121,25 @@ async function saveRandomCodeXml() {
 
     // 파일 쓰기
     fs.writeFileSync(filePath, resultMessage, "utf-8");
+
+    const batFilePath = `${process.cwd()}/push.bat`;
+    // .bat 파일 실행
+    exec(batFilePath, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`exec error: ${error}`);
+        logger.error(`exec error: ${error}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+        logger.error(`stderr: ${error}`);
+        return;
+      }
+
+      // 실행 결과 출력
+      console.log(`stdout: ${stdout}`);
+      logger.info(`stdout: ${stdout}`);
+    });
   } catch (error) {
     console.log("saveXmlFile ERROR: ", error);
     logger.error(`saveXmlFile: ${error}`);
