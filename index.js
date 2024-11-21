@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import winston, { createLogger, transports } from "winston";
 import OpenAIApi from "openai";
 import { exec } from "child_process";
+import schedule from "node-schedule";
 
 dotenv.config();
 
@@ -53,17 +54,17 @@ const assistantInfo = newsList
   .map((news, index) => {
     const title = `${news.title}\n`;
     const sub_title = news.sub_title ? `- ${news.sub_title}\n\n` : "\n";
-    const category = news.category.name;
+    // const category = news.category.name;
 
     return `${index + 1}. ${title}${sub_title}`;
   })
   .join(""); // 배열을 하나의 문자열로 병합
 
-console.log("assistantInfo :", assistantInfo);
+// console.log("assistantInfo :", assistantInfo);
 
 const ORDER = `
   당신은 매일 유용하고 간단한 코드 예제를 생성하는 프로그래밍 코드 생성기이다.
-  다음 뉴스들을 참고 후, 이와 관련된 간단한 프로그래밍 코드를 짤막하게 작성하라.
+  다음 뉴스들을 참고 후, 이와 관련된 간단한 알고리즘이나 관련된 기능의 프로그래밍 코드를 짧게 작성하라.
 
   ${assistantInfo}
 
@@ -81,7 +82,7 @@ const openai = new OpenAIApi({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function saveRandomCodeXml() {
+async function saveRandomCodeDiary() {
   try {
     const contentGpt = [
       // { role: "assistant", content: ASSISTANT },
@@ -141,10 +142,18 @@ async function saveRandomCodeXml() {
       logger.info(`stdout: ${stdout}`);
     });
   } catch (error) {
-    console.log("saveXmlFile ERROR: ", error);
-    logger.error(`saveXmlFile: ${error}`);
+    console.log("saveRandomCodeDiary ERROR: ", error);
+    logger.error(`saveRandomCodeDiary: ${error}`);
   } finally {
   }
 }
 
-await saveRandomCodeXml();
+await saveRandomCodeDiary();
+
+schedule.scheduleJob(
+  "saveRandomCodeDiary",
+  "0 30 9 * * *",
+  saveRandomCodeDiary
+);
+
+console.log("saveRandomCodeDiary started");

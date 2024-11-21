@@ -19,7 +19,7 @@ set minute=%datetime:~10,2%
 set commitMessage=%year%%month%%day%%hour%%minute%
 
 :: 커밋
-git commit -m "%commitMessage%"
+git commit -m "Save: %commitMessage%"
 
 :: 푸시
 git push
