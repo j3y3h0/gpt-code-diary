@@ -1,28 +1,34 @@
-### title: AI 비서가 기본 장착된 기기를 위한 간단한 음성 명령 인식 기능 구현
+### Title
+AI 비서 활성화 여부 확인 기능
 
-### content:
+### Language
+Python
+
+### Content
 ```python
-import speech_recognition as sr
+class PhoneSettings:
+    def __init__(self):
+        self.ai_assistant_enabled = False
 
-def recognize_speech_from_mic():
-    recognizer = sr.Recognizer()
-    microphone = sr.Microphone()
-    
-    with microphone as source:
-        print("Listening for a command...")
-        recognizer.adjust_for_ambient_noise(source)
-        audio = recognizer.listen(source)
-    
-    try:
-        command = recognizer.recognize_google(audio)
-        print(f"You said: {command}")
-    except sr.UnknownValueError:
-        print("Sorry, I could not understand the audio.")
-    except sr.RequestError:
-        print("Could not request results from Google Speech Recognition service.")
+    def enable_ai_assistant(self):
+        self.ai_assistant_enabled = True
+        print("AI 비서가 활성화되었습니다.")
 
-if __name__ == "__main__":
-    recognize_speech_from_mic()
+    def disable_ai_assistant(self):
+        self.ai_assistant_enabled = False
+        print("AI 비서가 비활성화되었습니다.")
+
+    def check_ai_assistant_status(self):
+        if self.ai_assistant_enabled:
+            print("AI 비서가 현재 활성화 상태입니다.")
+        else:
+            print("AI 비서가 현재 비활성화 상태입니다.")
+
+# 사용 예제
+user_phone = PhoneSettings()
+user_phone.check_ai_assistant_status()  # AI 비서가 현재 비활성화 상태입니다.
+user_phone.enable_ai_assistant()
+user_phone.check_ai_assistant_status()  # AI 비서가 현재 활성화 상태입니다.
+user_phone.disable_ai_assistant()
+user_phone.check_ai_assistant_status()  # AI 비서가 현재 비활성화 상태입니다.
 ```
-
-이 코드는 Python을 사용하여 마이크로부터 음성을 입력받아 Google Speech Recognition API를 통해 음성을 텍스트로 변환한다. 이는 AI 비서 기능을 지원하는 기기에서 음성 명령을 인식하는데 유용하다.
