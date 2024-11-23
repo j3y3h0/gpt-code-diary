@@ -29,3 +29,31 @@ OPENAI_API_KEY=your_openai_api_key
    생성된 코드를 지정된 경로에 파일로 저장한다.
 5. **깃허브 커밋 및 푸시**
    생성된 파일은 로컬에서 자동으로 커밋 및 푸시되어 깃허브 레포지토리에 업데이트된다.
+
+### 명령어
+
+```bash
+# 설치
+git clone https://github.com/j3y3h0/gpt-code-diary.git
+
+# 패키지 설치
+npm install
+
+# 수동 시작
+npm run dev
+
+# 백그라운드에서 계속 실행하게 해주는 forever 설치
+npm install forever -g
+
+# 백그라운드 시작
+forever start index.js
+
+# 백그라운드 중지
+forever stop index.js
+
+# 재시작
+forever restart index.js
+
+# 프로세스 조회
+forever list
+```
