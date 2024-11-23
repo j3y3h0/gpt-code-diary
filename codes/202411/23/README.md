@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 **title**: 네이버 '히든 아카이브' 취향저격 핫플레이스 추천 시스템
 
 **language**: Python
@@ -47,3 +48,30 @@ for i in range(top_n):
 ```
 
 이 코드는 사용자가 입력한 검색어와 유사한 핫플레이스를 추천하기 위한 시스템이다. TF-IDF 벡터화 및 코사인 유사도를 사용하여 유사성을 계산하고, 가장 유사한 핫플레이스를 추천한다.
+=======
+### title
+AI 비서 기능 활성화 여부 확인
+
+### language
+Python
+
+### content
+```python
+class Phone:
+    def __init__(self, model, ai_assistant_installed=False):
+        self.model = model
+        self.ai_assistant_installed = ai_assistant_installed
+
+    def check_ai_assistant(self):
+        if self.ai_assistant_installed:
+            return f"{self.model}에 AI 비서가 설치되어 있습니다."
+        else:
+            return f"{self.model}에 AI 비서가 설치되어 있지 않습니다."
+
+# 예시 갤럭시폰 객체 생성
+galaxy_phone = Phone("Galaxy", ai_assistant_installed=True)
+
+# AI 비서 설치 여부 확인
+print(galaxy_phone.check_ai_assistant())
+```
+>>>>>>> a6e74eac03d2116905e6b646ce22ebaa07e2b32e

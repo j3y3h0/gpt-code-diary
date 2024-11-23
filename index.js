@@ -84,10 +84,7 @@ const openai = new OpenAIApi({
 
 async function saveRandomCodeDiary() {
   try {
-    const contentGpt = [
-      // { role: "assistant", content: ASSISTANT },
-      { role: "user", content: ORDER },
-    ];
+    const contentGpt = [{ role: "user", content: ORDER }];
 
     // GPT 응답
     const responseGpt = await openai.chat.completions.create({
@@ -107,8 +104,6 @@ async function saveRandomCodeDiary() {
     const day = String(new Date(nowDate).getDate()).padStart(2, "0");
     const hour = String(new Date(nowDate).getHours()).padStart(2, "0");
     const minutes = String(new Date(nowDate).getMinutes()).padStart(2, "0");
-
-    const currentTime = `${year}${month}${day}${hour}${minutes}`;
 
     // 저장 경로와 파일 이름 설정
     const fileName = `README.md`;
