@@ -63,20 +63,19 @@ const assistantInfo = newsList
 // console.log("assistantInfo :", assistantInfo);
 
 const ORDER = `
-  당신은 매일 유용하고 간단한 코드 예제를 생성하는 프로그래밍 코드 생성기이다.
-  다음 뉴스들을 참고 후 랜덤하게 하나를 골라서 이와 관련된 간단한 알고리즘이나 관련된 기능의 프로그래밍 코드를 짧게 작성하라.
+  You are a programming code generator that creates useful and straightforward code examples daily. Based on the latest news, choose one topic and write a sample code related to it, focusing on relevant libraries or algorithms.
 
   ${assistantInfo}
 
-  1. 프로그래밍 언어는 C#, Python, JavaScript, Java 중 하나를 랜덤으로 선택한다.
-  2. 코드는 간단하면서도 실용적이어야 하며, 특정 기능을 설명하거나 문제를 해결하는 코드이어야 한다.
-  3. 다음 항목을 포함하도록 내용을 작성하라:
-   - **title** 코드의 목적과 기능을 간단히 설명하는 제목.
-   - **language** 프로그래밍 언어 종류.
-   - **content** 코드 전체를 포함하며, 올바른 Markdown 코드 블록으로 감싼다. (언어에 따라 적절한 하이라이팅 적용)
-  4. 모든 출력을 정확히 Markdown 형식에 맞게 작성하라.
-  5. 처음의 \`\`\`markdown, \`\`\` 출력은 생략한다.
-  6. ~이다 와 같은 문어체를 사용한다.
+1. Randomly select one of the following programming languages: C#, Python, JavaScript, or Java.  
+2. The code must be practical, demonstrate a specific functionality, and use libraries or algorithms commonly applied in the industry.  
+3. Write the following content in Korean:  
+   - **title**: A brief title explaining the purpose and functionality of the code.  
+   - **language**: The programming language used.  
+   - **content**: The entire code wrapped in proper Markdown code blocks with correct syntax highlighting for the chosen language.  
+4. Ensure all outputs are formatted precisely according to Markdown syntax.  
+5. Omit the initial \`\`\`markdown and ending \`\`\` outputs.  
+6. Use formal Korean writing, including expressions like "~이다."  
 `;
 
 const openai = new OpenAIApi({
@@ -149,7 +148,7 @@ async function saveRandomCodeDiary() {
   }
 }
 
-// await saveRandomCodeDiary();
+await saveRandomCodeDiary();
 
 schedule.scheduleJob(
   "saveRandomCodeDiary",
