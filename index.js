@@ -44,46 +44,47 @@ const logger = createLogger({
 
 //#endregion
 
-// const NEWS_API = "https://namu.news/api/sections/%40news/?page=1&limit=8"; // 종합
-const NEWS_API = "https://namu.news/api/categories/technology/?page=1&limit=8"; // IT/과학
-
-const responseApi = await axios.get(NEWS_API);
-const datas = responseApi.data;
-const newsList = datas.results;
-const assistantInfo = newsList
-  .map((news, index) => {
-    const title = `${news.title}\n`;
-    const sub_title = news.sub_title ? `- ${news.sub_title}\n\n` : "\n";
-    // const category = news.category.name;
-
-    return `${index + 1}. ${title}${sub_title}`;
-  })
-  .join(""); // 배열을 하나의 문자열로 병합
-
-// console.log("assistantInfo :", assistantInfo);
-
-const ORDER = `
-  You are a programming code generator that creates useful and straightforward code examples daily. Based on the latest news, choose one topic and write a sample code related to it, focusing on relevant libraries or algorithms.
-
-  ${assistantInfo}
-
-1. Randomly select one of the following programming languages: C#, Python, JavaScript, or Java.  
-2. The code must be practical, demonstrate a specific functionality, and use libraries or algorithms commonly applied in the industry.  
-3. Write the following content in Korean:  
-   - **title**: A brief title explaining the purpose and functionality of the code.  
-   - **language**: The programming language used.  
-   - **content**: The entire code wrapped in proper Markdown code blocks with correct syntax highlighting for the chosen language.  
-4. Ensure all outputs are formatted precisely according to Markdown syntax.  
-5. Omit the initial \`\`\`markdown and ending \`\`\` outputs.  
-6. Use formal Korean writing, including expressions like "~이다."  
-`;
-
 const openai = new OpenAIApi({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 async function saveRandomCodeDiary() {
   try {
+    // const NEWS_API = "https://namu.news/api/sections/%40news/?page=1&limit=8"; // 종합
+    const NEWS_API =
+      "https://namu.news/api/categories/technology/?page=1&limit=8"; // IT/과학
+
+    const responseApi = await axios.get(NEWS_API);
+    const datas = responseApi.data;
+    const newsList = datas.results;
+    const assistantInfo = newsList
+      .map((news, index) => {
+        const title = `${news.title}\n`;
+        const sub_title = news.sub_title ? `- ${news.sub_title}\n\n` : "\n";
+        // const category = news.category.name;
+
+        return `${index + 1}. ${title}${sub_title}`;
+      })
+      .join(""); // 배열을 하나의 문자열로 병합
+
+    console.log("assistantInfo :", assistantInfo);
+
+    const ORDER = `
+  You are a programming code generator that creates useful and straightforward code examples daily. Based on the latest news, choose one topic and write a sample code related to it, focusing on relevant libraries or algorithms.
+
+  ${assistantInfo}
+
+  1. Randomly select one of the following programming languages: C#, Python, JavaScript, or Java.  
+  2. The code must be practical, demonstrate a specific functionality, and use libraries or algorithms commonly applied in the industry.  
+  3. Write the following content in Korean:  
+    - **title**: A brief title explaining the purpose and functionality of the code.  
+    - **language**: The programming language used.  
+    - **content**: The entire code wrapped in proper Markdown code blocks with correct syntax highlighting for the chosen language.  
+  4. Ensure all outputs are formatted precisely according to Markdown syntax.  
+  5. Omit the initial \`\`\`markdown and ending \`\`\` outputs.  
+  6. Use formal Korean writing, including expressions like "~이다."  
+  `;
+
     const contentGpt = [{ role: "user", content: ORDER }];
 
     // GPT 응답
