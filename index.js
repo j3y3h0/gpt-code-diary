@@ -13,7 +13,7 @@ export const openai = new OpenAIApi({
 async function saveRandomCodeDiary() {
   try {
     const NEWS_API =
-      "https://namu.news/api/categories/technology/?page=1&limit=8"; // IT/과학
+      "https://namu.news/api/categories/technology/ranked?page=1&limit=9"; // IT/과학
 
     // 1. 뉴스 데이터 가져오기
     const newsList = await utils.fetchNews(NEWS_API);
