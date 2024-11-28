@@ -48,7 +48,8 @@ export async function generateCodeWithGpt(newsContent) {
   try {
     const response = await openai.chat.completions.create({
       messages: [{ role: "user", content: ORDER }],
-      model: "gpt-4o",
+      // model: "gpt-4o",
+      model: "gpt-4o-mini",
       temperature: 0.7,
     });
 
