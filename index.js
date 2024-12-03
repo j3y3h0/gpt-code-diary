@@ -40,7 +40,7 @@ async function saveRandomCodeDiary() {
   }
 }
 
-await saveRandomCodeDiary();
+//await saveRandomCodeDiary();
 
 schedule.scheduleJob(
   "saveRandomCodeDiary",
