@@ -1,42 +1,63 @@
-**title**: 웹사이트의 스팸 메시지 감지 및 차단 시스템
+최근 뉴스 중 '네이버클라우드, 무료 리눅스 배포판 '네빅스' 공개'에 관련하여, JavaScript를 사용하여 간단한 파일 업로드 기능을 구현하는 예제를 제공하고자 한다. 이 예제는 사용자가 파일을 선택하고, 선택된 파일을 서버에 업로드하는 기능을 포함한다. 이를 위해 `Express`와 `Multer` 라이브러리를 사용할 것이다.
 
-**language**: Python
+### 파일 업로드 서버 예제
 
-**content**:
-```python
-import re
-from flask import Flask, request, jsonify
+1. **필요한 라이브러리 설치**  
+   아래 명령어를 통해 `Express`와 `Multer`를 설치해야 한다.
+   ```bash
+   npm install express multer
+   ```
 
-app = Flask(__name__)
+2. **서버 코드 작성**  
+   다음 코드는 파일 업로드를 처리하는 기본적인 Express 서버를 설정하는 예제이다.
+   ```javascript
+   const express = require('express');
+   const multer = require('multer');
+   const path = require('path');
 
-# 스팸 메시지 패턴 정의
-SPAM_PATTERNS = [
-    r'\b무료\b',
-    r'\b돈\b',
-    r'\b사기\b',
-    r'\b확인\b',
-]
+   const app = express();
+   const port = 3000;
 
-def is_spam(message):
-    """주어진 메시지가 스팸인지 확인하는 함수"""
-    for pattern in SPAM_PATTERNS:
-        if re.search(pattern, message):
-            return True
-    return False
+   // Multer 설정
+   const storage = multer.diskStorage({
+       destination: (req, file, cb) => {
+           cb(null, 'uploads/');
+       },
+       filename: (req, file, cb) => {
+           cb(null, Date.now() + path.extname(file.originalname)); // 파일 이름을 현재 시간으로 설정
+       }
+   });
 
-@app.route('/submit', methods=['POST'])
-def submit_message():
-    """메시지를 제출하고 스팸 여부를 확인하는 API 엔드포인트"""
-    data = request.json
-    message = data.get('message', '')
+   const upload = multer({ storage: storage });
 
-    if is_spam(message):
-        return jsonify({"status": "error", "message": "스팸 메시지로 판단되었습니다."}), 400
-    else:
-        return jsonify({"status": "success", "message": "메시지가 성공적으로 전송되었습니다."}), 200
+   // 파일 업로드를 처리하는 POST 요청
+   app.post('/upload', upload.single('file'), (req, res) => {
+       res.send('파일 업로드 성공: ' + req.file.filename);
+   });
 
-if __name__ == '__main__':
-    app.run(debug=True)
-```
+   // 서버 시작
+   app.listen(port, () => {
+       console.log(`서버가 http://localhost:${port} 에서 실행 중입니다.`);
+   });
+   ```
 
-이 코드는 Flask를 사용하여 웹 서버를 구축하고, 사용자가 제출한 메시지에 스팸 여부를 판단하는 기능을 제공한다. 스팸 패턴을 정규 표현식으로 정의하여 메시지에 포함된 경우 이를 감지하고 차단하는 시스템이다.
+3. **클라이언트 HTML 코드**  
+   다음은 파일을 선택하고 업로드할 수 있는 간단한 HTML 폼이다.
+   ```html
+   <!DOCTYPE html>
+   <html lang="ko">
+   <head>
+       <meta charset="UTF-8">
+       <title>파일 업로드</title>
+   </head>
+   <body>
+       <h1>파일 업로드</h1>
+       <form action="http://localhost:3000/upload" method="POST" enctype="multipart/form-data">
+           <input type="file" name="file">
+           <button type="submit">업로드</button>
+       </form>
+   </body>
+   </html>
+   ```
+
+이 코드는 사용자에게 파일 업로드 기능을 제공하며, 선택된 파일은 서버의 'uploads' 폴더에 저장된다. 이 예제를 통해 사용자는 간단하게 파일을 서버에 업로드할 수 있는 인터페이스를 경험할 수 있다.

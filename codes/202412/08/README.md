@@ -1,48 +1,47 @@
-**title**: AI 기반 스팸 메시지 필터링 시스템  
+**title**: 네이버클라우드 '네빅스' 배포판을 위한 간단한 서버 설정 스크립트
 
-**language**: Python  
+**language**: Python
 
-**content**:  
+**content**:
 ```python
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import accuracy_score
+import os
+import subprocess
 
-# 데이터 로드
-data = pd.read_csv('spam_data.csv')  # 스팸 데이터가 저장된 CSV 파일
+def install_packages():
+    packages = [
+        "nginx",  # 웹 서버
+        "git",    # 버전 관리
+        "python3-pip"  # 파이썬 패키지 관리자
+    ]
+    for package in packages:
+        subprocess.run(["apt-get", "install", "-y", package])
 
-# 데이터 준비
-X = data['message']  # 메시지 컬럼
-y = data['label']    # 레이블 (스팸 또는 정상)
+def configure_nginx():
+    nginx_conf = """
+    server {
+        listen 80;
+        server_name example.com;
 
-# 데이터 분할
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        location / {
+            proxy_pass http://localhost:5000;
+        }
+    }
+    """
+    with open("/etc/nginx/sites-available/example", "w") as f:
+        f.write(nginx_conf)
 
-# 텍스트 데이터를 벡터화
-vectorizer = CountVectorizer()
-X_train_vect = vectorizer.fit_transform(X_train)
-X_test_vect = vectorizer.transform(X_test)
+    subprocess.run(["ln", "-s", "/etc/nginx/sites-available/example", "/etc/nginx/sites-enabled/"])
+    subprocess.run(["systemctl", "restart", "nginx"])
 
-# 모델 학습
-model = MultinomialNB()
-model.fit(X_train_vect, y_train)
+def main():
+    print("서버 패키지를 설치하는 중...")
+    install_packages()
+    print("Nginx를 구성하는 중...")
+    configure_nginx()
+    print("설정이 완료되었습니다.")
 
-# 예측
-y_pred = model.predict(X_test_vect)
+if __name__ == "__main__":
+    main()
+```
 
-# 정확도 평가
-accuracy = accuracy_score(y_test, y_pred)
-print(f'모델 정확도: {accuracy:.2f}')
-
-# 새로운 메시지 예측
-new_messages = ["무료로 아이폰을 드립니다!", "안녕하세요, 회의 일정 조정합니다."]
-new_messages_vect = vectorizer.transform(new_messages)
-predictions = model.predict(new_messages_vect)
-
-for msg, pred in zip(new_messages, predictions):
-    print(f'메시지: "{msg}" - 예측: {pred}')
-```  
-
-위 코드는 스팸 메시지를 필터링하기 위한 간단한 AI 모델을 구현한 것으로, 스팸 여부를 분류하는 기능을 제공한다. `pandas`, `scikit-learn`과 같은 라이브러리를 활용하여 데이터를 처리하고, Naive Bayes 알고리즘을 사용하여 모델을 학습시킨다.
+이 코드는 네이버클라우드의 무료 리눅스 배포판인 '네빅스'에서 웹 서버를 설정하는 간단한 Python 스크립트이다. 필요한 패키지를 설치하고 Nginx 웹 서버를 기본적으로 구성하는 기능을 제공한다.
