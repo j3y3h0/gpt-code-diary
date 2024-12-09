@@ -1,63 +1,67 @@
-최근 뉴스 중 '네이버클라우드, 무료 리눅스 배포판 '네빅스' 공개'에 관련하여, JavaScript를 사용하여 간단한 파일 업로드 기능을 구현하는 예제를 제공하고자 한다. 이 예제는 사용자가 파일을 선택하고, 선택된 파일을 서버에 업로드하는 기능을 포함한다. 이를 위해 `Express`와 `Multer` 라이브러리를 사용할 것이다.
+최근 뉴스에서 "AI와 함께 데이터 가치 실현"이라는 주제가 눈에 띄었다. 이에 따라 C#을 사용하여 데이터 분석을 위한 기본적인 AI 모델을 구축하는 예제를 제시하고자 한다. 이 코드는 ML.NET 라이브러리를 사용하여 간단한 머신러닝 모델을 생성하고, 데이터를 학습시키는 과정을 보여준다.
 
-### 파일 업로드 서버 예제
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+using Microsoft.ML;
+using Microsoft.ML.Data;
 
-1. **필요한 라이브러리 설치**  
-   아래 명령어를 통해 `Express`와 `Multer`를 설치해야 한다.
-   ```bash
-   npm install express multer
-   ```
+namespace AIDemo
+{
+    public class HouseData
+    {
+        public float Size { get; set; }
+        public float Price { get; set; }
+    }
 
-2. **서버 코드 작성**  
-   다음 코드는 파일 업로드를 처리하는 기본적인 Express 서버를 설정하는 예제이다.
-   ```javascript
-   const express = require('express');
-   const multer = require('multer');
-   const path = require('path');
+    public class Prediction
+    {
+        [ColumnName("Score")]
+        public float Price { get; set; }
+    }
 
-   const app = express();
-   const port = 3000;
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            // MLContext 생성
+            var mlContext = new MLContext();
 
-   // Multer 설정
-   const storage = multer.diskStorage({
-       destination: (req, file, cb) => {
-           cb(null, 'uploads/');
-       },
-       filename: (req, file, cb) => {
-           cb(null, Date.now() + path.extname(file.originalname)); // 파일 이름을 현재 시간으로 설정
-       }
-   });
+            // 데이터 로드
+            var houseData = new List<HouseData>
+            {
+                new HouseData { Size = 1.1F, Price = 1.2F },
+                new HouseData { Size = 1.9F, Price = 2.3F },
+                new HouseData { Size = 2.8F, Price = 3.0F },
+                new HouseData { Size = 3.4F, Price = 3.7F },
+                new HouseData { Size = 4.0F, Price = 4.0F }
+            };
 
-   const upload = multer({ storage: storage });
+            // 데이터셋 생성
+            var trainingData = mlContext.Data.LoadFromEnumerable(houseData);
 
-   // 파일 업로드를 처리하는 POST 요청
-   app.post('/upload', upload.single('file'), (req, res) => {
-       res.send('파일 업로드 성공: ' + req.file.filename);
-   });
+            // 학습 알고리즘 선택
+            var pipeline = mlContext.Transforms.Concatenate("Features", new[] { "Size" })
+                .Append(mlContext.Regression.Trainers.Sdca(labelColumnName: "Price", maximumNumberOfIterations: 100));
 
-   // 서버 시작
-   app.listen(port, () => {
-       console.log(`서버가 http://localhost:${port} 에서 실행 중입니다.`);
-   });
-   ```
+            // 모델 학습
+            var model = pipeline.Fit(trainingData);
 
-3. **클라이언트 HTML 코드**  
-   다음은 파일을 선택하고 업로드할 수 있는 간단한 HTML 폼이다.
-   ```html
-   <!DOCTYPE html>
-   <html lang="ko">
-   <head>
-       <meta charset="UTF-8">
-       <title>파일 업로드</title>
-   </head>
-   <body>
-       <h1>파일 업로드</h1>
-       <form action="http://localhost:3000/upload" method="POST" enctype="multipart/form-data">
-           <input type="file" name="file">
-           <button type="submit">업로드</button>
-       </form>
-   </body>
-   </html>
-   ```
+            // 예측 데이터 생성
+            var sizeToPredict = new HouseData() { Size = 1.5F };
+            var sizePrediction = mlContext.Data.LoadFromEnumerable(new List<HouseData> { sizeToPredict });
+            var pricePrediction = model.Transform(sizePrediction);
 
-이 코드는 사용자에게 파일 업로드 기능을 제공하며, 선택된 파일은 서버의 'uploads' 폴더에 저장된다. 이 예제를 통해 사용자는 간단하게 파일을 서버에 업로드할 수 있는 인터페이스를 경험할 수 있다.
+            // 예측 결과 출력
+            var predictions = mlContext.Data.CreateEnumerable<Prediction>(pricePrediction, reuseRowObject: false);
+            foreach (var prediction in predictions)
+            {
+                Console.WriteLine($"예상 가격: {prediction.Price}");
+            }
+        }
+    }
+}
+```
+
+위의 C# 코드는 간단한 주택 가격 예측 모델을 생성하기 위한 예제이다. ML.NET 라이브러리를 사용하여 주택의 크기를 입력으로 하여 가격을 예측하는 모델을 학습시킨다. 이 코드는 머신러닝의 기본 개념을 이해하고, AI와 데이터의 가치를 실현하는 데 도움을 줄 수 있다.
