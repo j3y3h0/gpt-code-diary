@@ -1,64 +1,53 @@
-최근 뉴스 중 '네이버클라우드, 무료 리눅스 배포판 '네빅스' 공개'에 관련하여, Java를 사용하여 리눅스 서버에서 파일을 다운로드하고 저장하는 간단한 프로그램을 작성해 보겠다. 이 프로그램은 Apache HttpClient 라이브러리를 활용하여 HTTP 요청을 통해 파일을 다운로드하는 기능을 포함하고 있다.
+이번 뉴스에서 "DL이앤씨, 외국인 근로자와 소통 위한 AI 자동번역 시스템 개발"이라는 주제를 선택하였다. 이에 따라, Java 언어를 사용하여 간단한 AI 기반 자동 번역 시스템을 구현하는 예제를 제시하겠다. 이 예제에서는 Google Cloud Translation API를 활용하여 입력된 텍스트를 지정된 언어로 번역하는 기능을 구현할 것이다.
 
-다음은 해당 기능을 구현한 코드 예시이다.
+### Maven 의존성 추가
+먼저, `pom.xml` 파일에 Google Cloud Translation API 의존성을 추가해야 한다.
+
+```xml
+<dependency>
+    <groupId>com.google.cloud</groupId>
+    <artifactId>google-cloud-translate</artifactId>
+    <version>2.0.0</version>
+</dependency>
+```
+
+### 자동 번역 시스템 코드
+
+다음으로, Java 클래스를 작성하여 자동 번역 기능을 구현한다.
 
 ```java
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import com.google.cloud.translate.Translate;
+import com.google.cloud.translate.TranslateOptions;
+import com.google.cloud.translate.Translation;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+public class AutoTranslator {
+    private final Translate translate;
 
-public class FileDownloader {
-    public static void main(String[] args) {
-        String fileUrl = "https://example.com/samplefile.txt"; // 다운로드할 파일의 URL
-        String destinationFile = "downloaded_samplefile.txt"; // 저장할 경로 및 파일 이름
-
-        try {
-            downloadFile(fileUrl, destinationFile);
-            System.out.println("파일 다운로드 완료: " + destinationFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public AutoTranslator() {
+        translate = TranslateOptions.getDefaultInstance().getService();
     }
 
-    public static void downloadFile(String fileUrl, String destinationFile) throws IOException {
-        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpGet httpGet = new HttpGet(fileUrl);
-            HttpResponse response = httpClient.execute(httpGet);
-            HttpEntity entity = response.getEntity();
+    public String translateText(String text, String targetLanguage) {
+        Translation translation = translate.translate(text, 
+                Translate.TranslateOption.targetLanguage(targetLanguage));
+        return translation.getTranslatedText();
+    }
 
-            if (entity != null) {
-                try (InputStream inputStream = entity.getContent();
-                     FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
-                    byte[] buffer = new byte[1024];
-                    int bytesRead;
-                    while ((bytesRead = inputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, bytesRead);
-                    }
-                }
-                EntityUtils.consume(entity);
-            }
-        }
+    public static void main(String[] args) {
+        AutoTranslator translator = new AutoTranslator();
+        String originalText = "안녕하세요, 여러분!";
+        String targetLanguage = "en"; // 영어로 번역
+
+        String translatedText = translator.translateText(originalText, targetLanguage);
+        System.out.println("원문: " + originalText);
+        System.out.println("번역문: " + translatedText);
     }
 }
 ```
 
-위 코드는 Apache HttpClient 라이브러리를 사용하여 지정된 URL에서 파일을 다운로드하고 로컬 파일로 저장하는 기능을 수행한다. 파일 URL과 저장할 파일 경로를 지정한 후, 프로그램을 실행하면 해당 파일이 다운로드된다. 
+### 코드 설명
+1. **Google Cloud Translation API**를 사용하여 번역 기능을 구현하였다. `Translate` 객체를 통해 번역 서비스를 사용할 수 있다.
+2. `translateText` 메서드는 입력된 텍스트와 목표 언어를 받아 해당 텍스트를 번역하여 반환한다.
+3. `main` 메서드에서는 자동 번역 시스템을 테스트하며, 한국어 문장을 영어로 번역하는 예제를 보여준다.
 
-이 코드를 실행하기 위해서는 Apache HttpClient 라이브러리가 필요하며, Maven을 사용하는 경우 `pom.xml` 파일에 다음 의존성을 추가하면 된다.
-
-```xml
-<dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpclient</artifactId>
-    <version>4.5.13</version> <!-- 사용하고자 하는 버전으로 변경 가능 -->
-</dependency>
-```
-
-이처럼, Java를 활용하여 네이버클라우드와 관련된 기능을 간단히 구현할 수 있다.
+위 코드를 통해 외국인 근로자와의 소통을 위한 간단한 AI 자동번역 시스템을 구현할 수 있다. 이 시스템은 실시간 번역 기능을 제공하여 다문화 환경에서의 의사소통을 원활하게 할 수 있도록 돕는다.
