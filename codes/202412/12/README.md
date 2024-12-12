@@ -1,47 +1,66 @@
-이번 뉴스에서 "KIST 연구팀, 소재개발 AI 자동화 시스템 '옥토퍼스' 개발"이라는 주제를 선택하였다. 이에 따라, Java를 사용하여 머신러닝 기반의 간단한 소재 개발 예측 모델을 구현하는 샘플 코드를 작성하겠다. 이 코드는 Apache Commons Math 라이브러리를 사용하여 선형 회귀 분석을 수행하는 예제이다.
+이번 뉴스 중 "똑똑한 '문어' 무인실험실로 소재실험 속도·효율 잡는다"와 관련하여, AI를 활용한 소재 개발 자동화 시스템을 구현하는 C# 코드 예제를 작성해보았다. 이 코드는 머신러닝을 활용하여 데이터 분석 및 예측을 수행하는 간단한 예제이다. 
 
-### Maven 의존성 추가
-먼저, `pom.xml` 파일에 Apache Commons Math 라이브러리를 추가해야 한다.
+아래 코드는 ML.NET 라이브러리를 사용하여 소재의 특성을 예측하는 모델을 훈련시키고 평가하는 기능을 포함하고 있다.
 
-```xml
-<dependency>
-    <groupId>org.apache.commons</groupId>
-    <artifactId>commons-math3</artifactId>
-    <version>3.6.1</version>
-</dependency>
-```
+```csharp
+using System;
+using System.IO;
+using System.Linq;
+using Microsoft.ML;
+using Microsoft.ML.Data;
 
-### 선형 회귀 모델 구현
+namespace MaterialPropertyPrediction
+{
+    public class MaterialData
+    {
+        public float Density { get; set; }
+        public float Hardness { get; set; }
+        public float Strength { get; set; }
+        public float PropertyToPredict { get; set; }
+    }
 
-```java
-import org.apache.commons.math3.stat.regression.SimpleRegression;
+    public class PredictionResult
+    {
+        [ColumnName("Score")]
+        public float PredictedProperty { get; set; }
+    }
 
-public class MaterialDevelopment {
-    public static void main(String[] args) {
-        // SimpleRegression 객체 생성
-        SimpleRegression regression = new SimpleRegression();
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var context = new MLContext();
 
-        // 데이터 추가: (x, y) 형태로 입력
-        // 예시: x는 소재의 성분 비율, y는 해당 성분으로 개발된 소재의 강도
-        regression.addData(0.1, 5.0);
-        regression.addData(0.2, 6.0);
-        regression.addData(0.3, 7.5);
-        regression.addData(0.4, 8.0);
-        regression.addData(0.5, 9.5);
+            // 데이터 불러오기
+            var dataPath = "material_data.csv"; // CSV 파일 경로
+            var dataView = context.Data.LoadFromTextFile<MaterialData>(dataPath, separatorChar: ',', hasHeader: true);
 
-        // 회귀 계수 출력
-        System.out.println("기울기: " + regression.getSlope());
-        System.out.println("절편: " + regression.getIntercept());
+            // 데이터 분할
+            var trainTestSplit = context.Data.TrainTestSplit(dataView, testFraction: 0.2);
 
-        // 예측
-        double newMaterialComposition = 0.6;
-        double predictedStrength = regression.predict(newMaterialComposition);
-        System.out.println("예측된 강도: " + predictedStrength);
+            // 데이터 전처리 및 모델 구성
+            var pipeline = context.Transforms.Concatenate("Features", nameof(MaterialData.Density), nameof(MaterialData.Hardness), nameof(MaterialData.Strength))
+                .Append(context.Regression.Trainers.Sdca(labelColumnName: nameof(MaterialData.PropertyToPredict), maximumNumberOfIterations: 100));
+
+            // 모델 훈련
+            var model = pipeline.Fit(trainTestSplit.TrainSet);
+
+            // 모델 평가
+            var predictions = model.Transform(trainTestSplit.TestSet);
+            var metrics = context.Regression.Evaluate(predictions, labelColumnName: nameof(MaterialData.PropertyToPredict));
+
+            Console.WriteLine($"R^2: {metrics.RSquared}");
+            Console.WriteLine($"RMSE: {metrics.RootMeanSquaredError}");
+
+            // 예측 예제
+            var sampleData = new MaterialData { Density = 7.85F, Hardness = 150F, Strength = 400F };
+            var predictionFunction = context.Model.CreatePredictionEngine<MaterialData, PredictionResult>(model);
+            var prediction = predictionFunction.Predict(sampleData);
+
+            Console.WriteLine($"예측된 소재 특성: {prediction.PredictedProperty}");
+        }
     }
 }
 ```
 
-### 코드 설명
-위 코드는 Apache Commons Math 라이브러리를 사용하여 간단한 선형 회귀 모델을 구현하는 예제이다. `SimpleRegression` 클래스를 통해 데이터를 추가하고 회귀 분석을 수행한다. 이후, 새로운 소재의 성분 비율에 대한 강도를 예측하는 기능도 포함되어 있다.
-
-이 코드는 소재 개발에 있어 AI 기반 예측 시스템의 기본적인 틀을 제공하며, 이를 통해 연구팀이 소재 실험의 속도와 효율을 높이는 데 기여할 수 있을 것이다.
+위 코드는 ML.NET을 활용하여 소재의 특성을 예측하는 기본적인 구조를 보여준다. 데이터는 CSV 파일에서 불러오며, 각 소재의 밀도, 경도, 강도 등의 특성을 입력받아 특정 소재 특성을 예측한다. 모델의 성능 평가 후, 새로운 자료에 대한 예측 결과도 출력한다. 이를 통해 AI 기반의 소재 개발 자동화 시스템의 기초적인 기능을 확인할 수 있다.
