@@ -1,66 +1,83 @@
-최근 KT가 스마트 보안 카메라 'KT 홈캠 안심'을 출시한 것과 관련하여, C#을 사용하여 CCTV 영상을 스트리밍하고 저장하는 간단한 애플리케이션 예제를 작성해 보았다. 이 예제는 AForge.NET 라이브러리를 사용하여 웹캠에서 비디오를 캡처하고 저장하는 기능을 포함하고 있다.
+최근 KT가 스마트 보안 카메라 'KT 홈캠 안심'을 출시한 소식과 관련하여, JavaScript를 이용한 간단한 보안 카메라 모니터링 웹 애플리케이션 예제를 소개하겠다. 이 예제에서는 `Socket.IO` 라이브러리를 사용하여 실시간으로 카메라 영상을 스트리밍하는 기능을 구현한다.
 
-```csharp
-using System;
-using System.Drawing;
-using System.Windows.Forms;
-using AForge.Video;
-using AForge.Video.DirectShow;
+### 보안 카메라 모니터링 웹 애플리케이션 예제
 
-namespace SmartCameraApp
-{
-    public partial class MainForm : Form
-    {
-        private FilterInfoCollection videoDevices;
-        private VideoCaptureDevice videoSource;
+#### 필요한 라이브러리
+- `express`: 웹 서버 구축을 위한 라이브러리
+- `socket.io`: 실시간 양방향 통신을 위한 라이브러리
+- `cv` (OpenCV): 비디오 스트리밍 및 처리 (Node.js에서 사용할 경우 `opencv4nodejs`와 같은 패키지를 설치해야 함)
 
-        public MainForm()
-        {
-            InitializeComponent();
-            videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
-            if (videoDevices.Count > 0)
-            {
-                videoSource = new VideoCaptureDevice(videoDevices[0].MonikerString);
-                videoSource.NewFrame += new NewFrameEventHandler(videoSource_NewFrame);
-                videoSource.Start();
-            }
-            else
-            {
-                MessageBox.Show("비디오 장치가 없습니다.");
-            }
-        }
+#### 서버 코드 (server.js)
+```javascript
+const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
+const cv = require('opencv4nodejs');
 
-        private void videoSource_NewFrame(object sender, NewFrameEventArgs eventArgs)
-        {
-            Bitmap bitmap = (Bitmap)eventArgs.Frame.Clone();
-            // 비디오 프레임을 PictureBox에 표시
-            videoPictureBox.Image = bitmap;
-        }
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
 
-        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (videoSource != null && videoSource.IsRunning)
-            {
-                videoSource.SignalToStop();
-                videoSource.WaitForStop();
-            }
-        }
+const PORT = 3000;
 
-        // 저장 버튼 클릭 시 호출되는 메서드
-        private void saveButton_Click(object sender, EventArgs e)
-        {
-            if (videoPictureBox.Image != null)
-            {
-                videoPictureBox.Image.Save("snapshot.png");
-                MessageBox.Show("스냅샷이 저장되었습니다.");
-            }
-            else
-            {
-                MessageBox.Show("저장할 이미지가 없습니다.");
-            }
-        }
-    }
-}
+// 비디오 캡처 초기화
+const wCap = new cv.VideoCapture(0); // 0은 기본 웹캠을 의미
+
+// 클라이언트 연결 시 이벤트 처리
+io.on('connection', (socket) => {
+    console.log('클라이언트 연결됨');
+
+    const sendFrame = () => {
+        const frame = wCap.read(); // 비디오 프레임 읽기
+        const image = cv.imencode('.jpg', frame).toString('base64'); // 이미지를 Base64로 인코딩
+        socket.emit('video', image); // 클라이언트로 프레임 전송
+
+        setTimeout(sendFrame, 100); // 100ms마다 프레임 전송
+    };
+
+    sendFrame();
+
+    socket.on('disconnect', () => {
+        console.log('클라이언트 연결 끊김');
+    });
+});
+
+// 정적 파일 제공
+app.use(express.static('public'));
+
+// 서버 시작
+server.listen(PORT, () => {
+    console.log(`서버가 http://localhost:${PORT} 에서 실행 중입니다.`);
+});
 ```
 
-이 코드는 사용자가 웹캠의 영상을 실시간으로 보고, 특정 버튼을 클릭하여 현재 화면을 PNG 파일로 저장할 수 있는 기능을 제공한다. AForge.NET 라이브러리를 통해 비디오 장치를 활용하고, FormClosing 이벤트를 통해 애플리케이션 종료 시 비디오 스트림을 안전하게 종료하도록 구성되어 있다.
+#### 클라이언트 코드 (public/index.html)
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>스마트 보안 카메라 모니터링</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <h1>스마트 보안 카메라 모니터링</h1>
+    <img id="video" src="" alt="비디오 스트리밍" style="width: 640px; height: auto;"/>
+    <script>
+        const socket = io();
+
+        socket.on('video', (image) => {
+            document.getElementById('video').src = `data:image/jpeg;base64,${image}`;
+        });
+    </script>
+</body>
+</html>
+```
+
+### 사용 방법
+1. Node.js 환경에서 `express`, `socket.io`, `opencv4nodejs`를 설치한다.
+2. 위의 서버 코드를 `server.js` 파일로 저장하고, 클라이언트 코드를 `public/index.html` 파일로 저장한다.
+3. 터미널에서 `node server.js` 명령어로 서버를 실행한다.
+4. 웹 브라우저에서 `http://localhost:3000`에 접속하여 실시간 비디오 스트리밍을 확인한다.
+
+이 코드는 KT 홈캠 안심과 같은 스마트 보안 카메라의 기본적인 기능을 구현한 예시로, 실시간으로 비디오를 스트리밍하여 모니터링할 수 있도록 한다.
