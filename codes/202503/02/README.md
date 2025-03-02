@@ -1,36 +1,53 @@
-AI와 관련된 최근 뉴스에 비추어, AI 기술을 활용한 간단한 Java 코드 예제를 작성해 보겠다. 이 코드는 자연어 처리(NLP) 라이브러리인 Stanford NLP를 사용하여 주어진 문장에서 명사 구를 추출하는 기능을 수행한다.
+이번 뉴스 주제 중 "AI시대, 불안한 마음들… 어떤 직업 가져야 하나요?"에 대한 내용을 바탕으로, Java를 사용하여 AI 관련 직업 정보를 검색하고 필터링하는 간단한 예제 코드를 작성하였다. 이 코드는 Java의 `Stream` API를 활용하여 직업 목록을 필터링하는 기능을 구현한다.
 
 ```java
-import edu.stanford.nlp.pipeline.*;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.util.CoreMap;
-
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class NounPhraseExtractor {
+class Job {
+    private String title;
+    private String field;
+
+    public Job(String title, String field) {
+        this.title = title;
+        this.field = field;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getField() {
+        return field;
+    }
+
+    @Override
+    public String toString() {
+        return title + " - " + field;
+    }
+}
+
+public class JobFilter {
     public static void main(String[] args) {
-        // Stanford NLP 파이프라인 설정
-        StanfordCoreNLP pipeline = new StanfordCoreNLP("properties/ner.properties");
+        List<Job> jobs = new ArrayList<>();
+        jobs.add(new Job("AI 연구원", "인공지능"));
+        jobs.add(new Job("데이터 과학자", "데이터 분석"));
+        jobs.add(new Job("소프트웨어 개발자", "프로그래밍"));
+        jobs.add(new Job("비즈니스 분석가", "비즈니스"));
+        jobs.add(new Job("AI 시스템 엔지니어", "인공지능"));
 
-        // 분석할 문장
-        String text = "AI 시대에 우리는 어떤 직업을 가져야 할까?";
+        String searchField = "인공지능";
 
-        // 문장을 CoreMap으로 변환
-        CoreDocument document = new CoreDocument(text);
-        pipeline.annotate(document);
+        List<Job> filteredJobs = jobs.stream()
+            .filter(job -> job.getField().equalsIgnoreCase(searchField))
+            .collect(Collectors.toList());
 
-        // 명사 구 추출
-        for (CoreSentence sentence : document.sentences()) {
-            List<String> nounPhrases = sentence.entityMentions().stream()
-                    .map(entity -> entity.text())
-                    .toList();
-
-            System.out.println("명사 구: " + nounPhrases);
-        }
+        System.out.println("검색한 분야: " + searchField);
+        System.out.println("해당 분야의 직업 목록:");
+        filteredJobs.forEach(System.out::println);
     }
 }
 ```
 
-위 코드에서는 Stanford NLP 라이브러리를 사용하여 입력된 텍스트에서 명사 구를 추출하는 과정을 보여준다. `StanfordCoreNLP` 클래스를 통해 NLP 파이프라인을 설정하고, 입력된 문장을 분석하여 명사 구를 출력한다. 이 코드는 AI 관련 직업에 대한 문장 분석을 할 때 유용하게 사용될 수 있다. 
-
-코드를 실행하기 위해서는 Stanford NLP 라이브러리를 Maven 또는 Gradle 프로젝트에 추가해야 하며, 필요한 데이터 파일을 다운로드하여 `properties/ner.properties` 경로에 위치시켜야 한다.
+위 코드는 다양한 직업 목록에서 특정 분야(여기서는 "인공지능")에 해당하는 직업만을 필터링하여 출력하는 기능을 수행한다. `Job` 클래스는 직업의 제목과 분야를 저장하고, `JobFilter` 클래스의 `main` 메서드에서는 직업 목록을 생성한 후 `Stream` API를 사용하여 분야에 따라 필터링한 결과를 출력한다. 이 예제는 AI 관련 직업에 대한 정보를 효과적으로 검색하고 필터링하는 데 유용할 수 있다.
