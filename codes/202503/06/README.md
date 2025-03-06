@@ -1,58 +1,60 @@
-안랩클라우드의 AI 어시스턴트 구축 지원 플랫폼 출시와 관련하여, JavaScript를 사용하여 간단한 AI 챗봇을 구현하는 예제를 소개하겠다. 이 예제에서는 `express`와 `axios` 라이브러리를 활용하여 사용자의 질문에 답변하는 간단한 서버를 구축할 것이다.
+이번 뉴스 중 "안랩클라우드, AI 어시스턴트 구축 지원 플랫폼 출시"를 주제로 하여 C#을 사용한 간단한 AI 어시스턴트 코드를 작성하였다. 이 코드는 사용자의 질문에 대해 간단한 응답을 제공하는 기능을 수행한다. 이를 위해 `System.Speech` 라이브러리를 사용하여 음성 인식 및 음성 출력을 구현하였다.
 
-### 코드 예제: AI 챗봇 서버 구축
+```csharp
+using System;
+using System.Speech.Recognition;
+using System.Speech.Synthesis;
 
-```javascript
-// 필요한 라이브러리 불러오기
-const express = require('express');
-const axios = require('axios');
-const bodyParser = require('body-parser');
-
-const app = express();
-const PORT = 3000;
-
-// JSON 형태의 요청 본문을 처리하기 위한 미들웨어 설정
-app.use(bodyParser.json());
-
-// 기본 라우트 설정
-app.get('/', (req, res) => {
-    res.send('AI 챗봇 서버에 오신 것을 환영합니다!');
-});
-
-// 사용자 질문을 처리하는 엔드포인트
-app.post('/ask', async (req, res) => {
-    const userQuestion = req.body.question;
-
-    // AI API 호출 (예: OpenAI의 GPT API)
-    try {
-        const response = await axios.post('https://api.openai.com/v1/engines/davinci/completions', {
-            prompt: userQuestion,
-            max_tokens: 150,
-            n: 1,
-            stop: null,
-            temperature: 0.5,
-        }, {
-            headers: {
-                'Authorization': `Bearer YOUR_API_KEY`, // 실제 API 키로 대체해야 함
-                'Content-Type': 'application/json'
-            }
-        });
-
-        const answer = response.data.choices[0].text.trim();
-        res.json({ answer });
-    } catch (error) {
-        console.error('Error fetching AI response:', error);
-        res.status(500).json({ error: 'AI 응답을 가져오는 데 실패했습니다.' });
+class Program
+{
+    static void Main(string[] args)
+    {
+        SpeechRecognitionEngine recognizer = new SpeechRecognitionEngine();
+        SpeechSynthesizer synthesizer = new SpeechSynthesizer();
+        
+        // 음성 인식할 문구 설정
+        Choices commands = new Choices();
+        commands.Add(new string[] { "안녕", "오늘 날씨 어때?", "고마워", "끝내줘" });
+        
+        GrammarBuilder gb = new GrammarBuilder();
+        gb.Append(commands);
+        Grammar grammar = new Grammar(gb);
+        
+        recognizer.LoadGrammar(grammar);
+        recognizer.SpeechRecognized += Recognizer_SpeechRecognized;
+        
+        synthesizer.Speak("AI 어시스턴트가 준비되었습니다. 질문을 해주세요.");
+        
+        // 음성 인식 시작
+        recognizer.SetInputToDefaultAudioDevice();
+        recognizer.RecognizeAsync(RecognizeMode.Multiple);
+        
+        Console.WriteLine("종료하려면 '끝내줘'라고 말하세요.");
+        Console.ReadLine();
     }
-});
 
-// 서버 시작
-app.listen(PORT, () => {
-    console.log(`서버가 http://localhost:${PORT}에서 실행 중입니다.`);
-});
+    private static void Recognizer_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
+    {
+        SpeechSynthesizer synthesizer = new SpeechSynthesizer();
+        
+        switch (e.Result.Text)
+        {
+            case "안녕":
+                synthesizer.Speak("안녕하세요! 무엇을 도와드릴까요?");
+                break;
+            case "오늘 날씨 어때?":
+                synthesizer.Speak("오늘의 날씨는 맑습니다.");
+                break;
+            case "고마워":
+                synthesizer.Speak("천만에요!");
+                break;
+            case "끝내줘":
+                synthesizer.Speak("안녕히 가세요!");
+                Environment.Exit(0);
+                break;
+        }
+    }
+}
 ```
 
-### 설명
-위 코드는 Express.js를 사용하여 간단한 웹 서버를 구축하는 예제이다. 사용자가 POST 요청을 통해 질문을 보내면, AI API를 호출하여 해당 질문에 대한 답변을 받아온다. 이 과정에서 `axios` 라이브러리를 사용하여 API 요청을 관리한다. 
-
-위 코드를 실행하기 위해서는 `express`와 `axios`를 설치하고, OpenAI API와 같은 AI 서비스의 API 키를 설정해야 한다. 이 챗봇은 사용자 질문에 대한 실시간 응답을 제공할 수 있는 기본적인 구조를 가지고 있다.
+위 코드는 C#의 `System.Speech` 네임스페이스를 사용하여 음성 인식을 통해 사용자와 상호작용할 수 있는 간단한 AI 어시스턴트를 구현한 예시이다. 사용자는 음성으로 명령을 내릴 수 있으며, AI는 이에 대한 적절한 응답을 음성으로 출력한다.
