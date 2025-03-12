@@ -1,59 +1,39 @@
-최근 뉴스 중 "게임 제작사 버추어스 '서울에 개발 스튜디오 설립'"이라는 주제를 바탕으로, C#을 사용하여 간단한 게임 캐릭터를 생성하고 관리하는 코드 예제를 작성하였다. 이 예제는 Unity 게임 엔진을 활용하여 캐릭터의 속성을 정의하고, 해당 캐릭터를 생성하는 기능을 포함한다.
+이번 뉴스 중 "LG유플러스, '3GPP 6G 워크숍'에서 6G 비전 제시"를 주제로 선택하였다. 6G 기술은 앞으로의 통신 기술 발전에 중요한 역할을 할 것이므로, 이에 맞춰 C#을 이용한 간단한 네트워크 데이터 시뮬레이션 코드를 작성해 보겠다.
+
+이 코드는 네트워크의 대역폭과 지연 시간을 시뮬레이션하여 데이터 전송의 성능을 평가하는 기능을 한다. 이를 위해 `System.Net.Http` 라이브러리를 활용한다.
 
 ```csharp
-using UnityEngine;
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 
-// 캐릭터 클래스를 정의한다.
-public class GameCharacter
+class NetworkSimulator
 {
-    public string Name { get; private set; }
-    public int Health { get; private set; }
-    public int AttackPower { get; private set; }
+    private static readonly HttpClient client = new HttpClient();
 
-    // 생성자
-    public GameCharacter(string name, int health, int attackPower)
+    public static async Task Main(string[] args)
     {
-        Name = name;
-        Health = health;
-        AttackPower = attackPower;
-    }
+        string url = "https://example.com"; // 테스트할 URL
+        int numberOfRequests = 10; // 요청 수
 
-    // 공격 메서드
-    public void Attack(GameCharacter target)
-    {
-        Debug.Log($"{Name}이 {target.Name}을 공격합니다! 공격력: {AttackPower}");
-        target.TakeDamage(AttackPower);
-    }
-
-    // 피해를 받는 메서드
-    public void TakeDamage(int damage)
-    {
-        Health -= damage;
-        if (Health <= 0)
+        for (int i = 0; i < numberOfRequests; i++)
         {
-            Debug.Log($"{Name}이 사망하였습니다.");
-        }
-        else
-        {
-            Debug.Log($"{Name}의 남은 체력: {Health}");
-        }
-    }
-}
+            long startTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(); // 시작 시간
+            HttpResponseMessage response = await client.GetAsync(url);
+            long endTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(); // 종료 시간
 
-// 게임 시작을 위한 MonoBehaviour 클래스
-public class GameManager : MonoBehaviour
-{
-    void Start()
-    {
-        // 캐릭터 생성
-        GameCharacter hero = new GameCharacter("영웅", 100, 20);
-        GameCharacter monster = new GameCharacter("괴물", 80, 15);
-
-        // 캐릭터 간의 전투 시뮬레이션
-        hero.Attack(monster);
-        monster.Attack(hero);
+            if (response.IsSuccessStatusCode)
+            {
+                long elapsedMilliseconds = endTime - startTime; // 소요 시간
+                Console.WriteLine($"요청 {i + 1}: 성공, 소요 시간: {elapsedMilliseconds}ms");
+            }
+            else
+            {
+                Console.WriteLine($"요청 {i + 1}: 실패, 상태 코드: {response.StatusCode}");
+            }
+        }
     }
 }
 ```
 
-이 코드는 Unity의 MonoBehaviour 클래스를 상속받은 GameManager를 통해 게임이 시작될 때 두 개의 캐릭터를 생성하고 서로 공격하는 간단한 전투 시뮬레이션을 구현한다. `GameCharacter` 클래스는 캐릭터의 이름, 체력, 공격력을 속성으로 가지며, 공격 및 피해 처리 메서드를 포함하고 있다. 이 예제를 통해 게임 개발의 기초적인 개념을 익힐 수 있을 것이다.
+위 코드는 주어진 URL에 대해 여러 번 HTTP GET 요청을 보내고, 각 요청의 성공 여부와 소요 시간을 출력한다. 이 시뮬레이션은 6G 통신 기술의 성능 평가에 유용할 수 있으며, 향후 네트워크의 대역폭과 지연 시간을 평가하는 데 기여할 수 있다.
