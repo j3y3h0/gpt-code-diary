@@ -1,0 +1,38 @@
+[
+  {
+    "productId": "P001",
+    "quantity": 10,
+    "pricePerUnit": 1500.50,
+    "saleDate": "2026-07-20T10:00:00Z"
+  },
+  {
+    "productId": "P002",
+    "quantity": 5,
+    "pricePerUnit": 20000.00,
+    "saleDate": "2026-07-20T11:30:00Z"
+  },
+  {
+    "productId": "P001",
+    "quantity": 3,
+    "pricePerUnit": 1500.50,
+    "saleDate": "2026-07-21T14:00:00Z"
+  },
+  {
+    "productId": "P003",
+    "quantity": 2,
+    "pricePerUnit": 7500.25,
+    "saleDate": "2026-07-22T09:15:00Z"
+  },
+  {
+    "productId": "P002",
+    "quantity": 8,
+    "pricePerUnit": 20000.00,
+    "saleDate": "2026-07-23T16:45:00Z"
+  },
+  {
+    "productId": "P001",
+    "quantity": 7,
+    "pricePerUnit": 1500.50,
+    "saleDate": "2026-07-24T12:00:00Z"
+  }
+]
